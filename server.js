@@ -25,10 +25,11 @@ mongoose.connect(url); // connect to our database
       console.log('Express server listening on port ' + server.address().port);
     });
     function errorHandler(err, req, res, next) {
-   if (res.headersSent) {
-    res.send (err);
-     return next(err);
-   }
-   res.status(400);
-   res.render('error', { error: err });
+      if (res.headersSent) {
+        res.status(400);
+        res.send (err);
+        return next(err);
+      }
+      res.status(400);
+      res.render('error', { error: err });
  }
