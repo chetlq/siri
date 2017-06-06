@@ -166,9 +166,10 @@ router.get('/orders/:product_id', function(req, res, next) {
       var query = Order.find({});
       query.where('product_id').exists();
       query.where('amount').exists();
-      if ((req.body.product_id!==undefined) && (req.body.product_id.length>0)){
-        query.where('product_id',req.body.product_id);
-      };
+      if ((req.params.product_id!==undefined) && (req.params.product_id.length>0)){
+        query.where('product_id',req.params.product_id);
+      }
+      else{return next("error")};
 
       query.exec(function( err, orders){
         if (err)
@@ -186,5 +187,52 @@ router.get('/orders/:product_id', function(req, res, next) {
               res.end(JSON.stringify(tr, null, 2));
               //res.json(bears);
           });
+});
+//==========================================================================================================
 
+router.post('/balance/:balance',function(req, res, next) {
+
+  var account = new Account();
+  account.login = "ivan";
+  //order.amount = req.body.amount;
+  var p= parseInt(req.params.balance);
+
+  if( !isNaN(p)) {
+    account.balance = req.params.balance;
+    account.save(function(err) {
+        if (err)
+        {
+          return next(err);
+        }
+        res.status(200);
+        res.json({ message: 'Account post!' });
+      })
+    }
+    else {
+      res.status(400);
+      res.json({ message: "Account not post! "});
+      return next("error");
+    }
+});
+
+
+router.get('/balance', function(req, res,next) {
+    res.setHeader('Content-Type', 'application/JSON');
+    var query = Account.find({});
+    query.where('login',"ivan");
+    query.exec(function(err, account){
+      if (err)
+      {
+          return next(err);
+
+      }
+            var tr=[];
+            for (var key in account) {
+              tr.push({balance:account[key].balance});
+              console.log(tr[key]);
+
+            }
+            res.end(JSON.stringify(tr, null, 2));
+            //res.json(bears);
+        });
 });

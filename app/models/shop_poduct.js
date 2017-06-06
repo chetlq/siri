@@ -3,7 +3,6 @@ var Schema       = mongoose.Schema;
 
 var schema   = new Schema({
   product_name: {type:String,lowercase: true, required: true, unique: true },
-  //product_id:{type:String, unique: true,required: true },
   prod_attributes:String,
   price: { type: Number, min: 0,required: true, default: 0 }
 
