@@ -1,3 +1,4 @@
+/*
 var express = require('express');
 var Account  = require('../models/my_account');
 var Order  = require('../models/shop_order');
@@ -236,3 +237,4 @@ router.get('/balance', function(req, res,next) {
             //res.json(bears);
         });
 });
+*/
