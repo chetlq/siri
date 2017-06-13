@@ -1,5 +1,6 @@
-/*
+
 var express = require('express');
+
 var Account  = require('../models/my_account');
 var Order  = require('../models/shop_order');
 var Product  = require('../models/shop_poduct');
@@ -17,8 +18,8 @@ router.post('/product',function(req, res, next) {
   product.product_name = req.body.product_name;
   product.prod_attributes = req.body.prod_attributes;
   var p= parseInt(req.body.price);
-
-  if( !isNaN(p) &&  (req.body.product_name>0)) {
+  product.price = p;
+  if( !isNaN(p) &&  (req.body.product_name.length>0)) {
     product.save(function(err) {
         if (err)
         {
@@ -106,7 +107,7 @@ router.post('/order',function(req, res, next) {
   //order.amount = req.body.amount;
   var p= parseInt(req.body.amount);
 
-  if( !isNaN(p) &&  (req.body.product_id>0)) {
+  if( !isNaN(p) &&  (req.body.product_id.length>0)) {
     order.amount = req.body.amount;
     order.save(function(err) {
         if (err)
@@ -237,4 +238,5 @@ router.get('/balance', function(req, res,next) {
             //res.json(bears);
         });
 });
-*/
+
+module.exports = router;

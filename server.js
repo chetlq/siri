@@ -15,6 +15,7 @@ mongoose.connect(url); // connect to our database
 
     app.use(bodyParser.json());
     //app.use(bodyParser.urlencoded());
+
     app.use('/', birds);
     app.use('/', shops);
     //app.use(function(err, req, res, next) {
@@ -29,7 +30,6 @@ mongoose.connect(url); // connect to our database
     });
     function errorHandler(err, req, res, next) {
       if (res.headersSent) {
-        res.status(400);
         res.send (err);
         return next(err);
       }
