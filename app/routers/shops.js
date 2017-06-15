@@ -195,10 +195,24 @@ router.get('/orders/:product_id', function(req, res, next) {
 router.post('/balance/:balance',function(req, res, next) {
 
   var account = new Account();
-  account.login = "ivan";
+  //account.login = "ivan";
   //order.amount = req.body.amount;
   var p= parseInt(req.params.balance);
+  function callback (err, numAffected) {
+    if (err)
+    {
+      return next(err);
+    }
+    res.status(200);
+    res.json({ message: 'Account post!' });
+  };
+  var query = { login: "ivan" };
+  options = { multi: true };
+  Account.update(query, {  balance: p }, options, callback)
 
+
+
+/*
   if( !isNaN(p)) {
     account.balance = req.params.balance;
     account.save(function(err) {
@@ -215,6 +229,7 @@ router.post('/balance/:balance',function(req, res, next) {
       res.json({ message: "Account not post! "});
       return next("error");
     }
+    */
 });
 
 
@@ -230,7 +245,7 @@ router.get('/balance', function(req, res,next) {
       }
             var tr=[];
             for (var key in account) {
-              tr.push({balance:account[key].balance});
+              tr.push({balance:account[key].balance, login:account[key].login});
               console.log(tr[key]);
 
             }
