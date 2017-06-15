@@ -1,6 +1,6 @@
 
 var express = require('express');
-
+var Bear  = require('../models/bears');
 var Account  = require('../models/my_account');
 var Order  = require('../models/shop_order');
 var Product  = require('../models/shop_poduct');
@@ -152,7 +152,7 @@ router.get('/orders', function(req, res,next) {
       }
             var tr=[];
             for (var key in orders) {
-              tr.push({product_id:orders[key].product_id,  amount:orders[key].amount});
+              tr.push({product_id:orders[key].product_id,  amount:orders[key].amount, date:orders[key].date});
               console.log(tr[key]);
 
             }
@@ -193,8 +193,6 @@ router.get('/orders/:product_id', function(req, res, next) {
 //==========================================================================================================
 
 router.post('/balance/:balance',function(req, res, next) {
-
-  var account = new Account();
   //account.login = "ivan";
   //order.amount = req.body.amount;
   var p= parseInt(req.params.balance);
@@ -210,26 +208,6 @@ router.post('/balance/:balance',function(req, res, next) {
   options = { multi: true };
   Account.update(query, {  balance: p }, options, callback)
 
-
-
-/*
-  if( !isNaN(p)) {
-    account.balance = req.params.balance;
-    account.save(function(err) {
-        if (err)
-        {
-          return next(err);
-        }
-        res.status(200);
-        res.json({ message: 'Account post!' });
-      })
-    }
-    else {
-      res.status(400);
-      res.json({ message: "Account not post! "});
-      return next("error");
-    }
-    */
 });
 
 
@@ -253,5 +231,45 @@ router.get('/balance', function(req, res,next) {
             //res.json(bears);
         });
 });
+//====================================================================================================
 
+
+
+
+
+router.get('/between', function(req, res,next) {
+    res.setHeader('Content-Type', 'application/JSON');
+    var tr=[];
+    var from = new Date(req.body.from);
+  //  var to = new Date(req.body.to);
+
+
+    var query = Order.find({"date": {"$gte": from, "$lt": new Date()}})
+    var query2 = Bear.find({"date1": {"$gte": from, "$lt": new Date()}})
+
+    Promise.all([
+      query.exec(),
+      query2.exec(),
+    ]).then(results => {
+      console.log(results);
+              for (var key in order=results[0]) {
+                tr.push({product_id:order[key].product_id,  amount:order[key].amount, date:order[key].date });
+              }
+              for (var key in bears=results[1]) {
+                tr.push({ status:bears[key].status,  nick: bears[key].nick,transfer_amount :bears[key].transfer_amount, date_of_request:bears[key].date1, date_of_confirm:bears[key].date2});
+              }
+              res.end(JSON.stringify(tr, null, 2));
+    });
+
+
+
+  });
+
+
+function getDateAgo(date, days) {
+  var dateCopy = new Date(date);
+
+  dateCopy.setDate(date.getDate() - days);
+  return dateCopy.getDate();
+}
 module.exports = router;
