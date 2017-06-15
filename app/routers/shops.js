@@ -6,7 +6,6 @@ var Order  = require('../models/shop_order');
 var Product  = require('../models/shop_poduct');
 var router = express.Router();
 
-
 // define the home page route
 router.get('/product', function(req, res) {
   res.send('Sberbank prod');
@@ -232,38 +231,109 @@ router.get('/balance', function(req, res,next) {
         });
 });
 //====================================================================================================
+function obj() {
+
+
+  var self = this;
+
+  this.days = {
+    'monday': 1,
+    'tuesday': 2,
+    'wednesday': 3,
+    'thursday': 4,
+    'friday': 5,
+    'saturday': 6,
+    'sunday': 7
+  }
+  this.fromto = {}
+
+  this.getIntervalOfDay = function(day){
+    console.log(day);
+    var now = new Date();
+    //res.end(JSON.stringify(day, null, 2));
+
+    return now.getDay() - self.days[day]
+  }
+
+  this.onDay = function(day){
+    var now = new Date();
+    var interval = self.getIntervalOfDay(day);
+    if (self.getIntervalOfDay(day)>0){
+      self.fromto.from = new Date(now.getFullYear(), now.getMonth(), now.getDate() - interval);
+      self.fromto.to = new Date(now.getFullYear(), now.getMonth(), now.getDate()- interval+1);
+      return self.fromto;
+    } else if (self.getIntervalOfDay(day)==0) {
+      self.fromto.from = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      self.fromto.to = now;
+      return self.fromto;
+    } else {
+      self.fromto.from = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay() - (7-self.days[day]));
+      self.fromto.to = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay() - (6-self.days[day]));
+      return self.fromto;
+    }
+  }
+
+  this.yesterday = function() {
+    var now = new Date();
+    self.fromto.from = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+    self.fromto.to = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    return self.fromto;
+  }
+
+  this.today = function() {
+    var now = new Date();
+    self.fromto.from = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    self.fromto.to = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds());
+    return self.fromto;
+  }
+
+}
 
 
 
 
 
-router.get('/between', function(req, res,next) {
-    res.setHeader('Content-Type', 'application/JSON');
-    var tr=[];
-    var from = new Date(req.body.from);
-  //  var to = new Date(req.body.to);
+
+// function getSecondsFromYesturday() {
+//   var now = new Date();
+//
+//   // создать объект из завтрашней даты, без часов-минут-секунд
+//   var yesturday = new Date(now.getFullYear(), now.getMonth(), now.getDate());//,now.getHours(),now.getMinutes(),now.getSeconds());
+//
+//   var diff =  now-yesturday; // разница в миллисекундах
+//   return Math.floor(diff / 1000/60/60); // перевести в часы
+// }
+router.get('/days/:day', function(req, res, next) {
+ var myObj = new  obj();
+  myObj.onDay(req.params.day);
+  var l = myObj.fromto;
+  res.end(JSON.stringify(new Array(l.from,l.to), null, 2));
+});
+
+router.get('/between', function(req, res, next) {
+      res.setHeader('Content-Type', 'application/JSON');
+      var tr = [];
+      var from = new Date(req.body.from);
+      var to = new Date(req.body.to);
 
 
-    var query = Order.find({"date": {"$gte": from, "$lt": new Date()}})
-    var query2 = Bear.find({"date1": {"$gte": from, "$lt": new Date()}})
+      var query = Order.find({"date": {"$gte": from, "$lt": new Date()}})
+      var query2 = Bear.find({"date1": {"$gte": from, "$lt": new Date()}})
 
     Promise.all([
-      query.exec(),
-      query2.exec(),
-    ]).then(results => {
-      console.log(results);
-              for (var key in order=results[0]) {
+        query.exec(),
+        query2.exec(),
+      ]).then(results => {
+          console.log(results);
+          for (var key in order = results[0]) {
                 tr.push({product_id:order[key].product_id,  amount:order[key].amount, date:order[key].date });
               }
               for (var key in bears=results[1]) {
                 tr.push({ status:bears[key].status,  nick: bears[key].nick,transfer_amount :bears[key].transfer_amount, date_of_request:bears[key].date1, date_of_confirm:bears[key].date2});
               }
               res.end(JSON.stringify(tr, null, 2));
-    });
-
-
-
-  });
+            });
+});
 
 
 function getDateAgo(date, days) {
